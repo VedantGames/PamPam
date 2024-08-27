@@ -74,18 +74,26 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
+
 function App() {
   const [expiryData, setExpiryData] = useState([]);
   const [premiumsData, setPremiumsData] = useState([]);
 
   const [selectedExpiries, setSelectedExpiries] = useState([0, 0, 0, 0, 0, 0, 0]);
   const [lastPrices, setLastPrices] = useState([]);
-
-  useEffect(() => {
+  
+  const loadExpiriesData = () => {
     axios
       .get('/expiries/all')
-      .then(({data}) => setExpiryData(data.data.result))
+      .then(({data}) => {
+        setExpiryData(data.data.result);
+        setInterval(loadExpiriesData, 60000);
+      })
       .catch((error) => console.log(error));
+  };
+
+  useEffect(() => {
+    loadExpiriesData();
   }, []);
 
   useEffect(() => {
@@ -128,7 +136,6 @@ function App() {
 
   return (
     <div className='grid grid-cols-3 mt-10 font-sans'>
-      {console.log(premiumsData, expiryData, lastPrices)}
       {(expiryData.length > 0 && premiumsData.length > 0) ? expiryData.map((index, i) => (
         <div key={index} className='w-full mb-5'>
           <div className='flex justify-center gap-5'>
