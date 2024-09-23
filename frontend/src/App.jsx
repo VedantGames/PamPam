@@ -87,7 +87,15 @@ function App() {
       .get('/expiries/all')
       .then(({data}) => {
         setExpiryData(data.data.result);
-        setInterval(loadExpiriesData, 60000);
+
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+
+        if ((hours > 9 || (hours === 9 && minutes >= 15)) && (hours < 15 || (hours === 15 && minutes <= 30)))
+          setInterval(loadExpiriesData, 60000);
+        else 
+          setInterval(loadExpiriesData, new Date().setHours(9, 15, 0, 0) - new Date());
       })
       .catch((error) => console.log(error));
   };
@@ -138,6 +146,7 @@ function App() {
     <div className='grid grid-cols-3 mt-10 font-sans'>
       {(expiryData.length > 0 && premiumsData.length > 0) ? expiryData.map((index, i) => (
         <div key={index} className='w-full mb-5'>
+          {console.log(expiryData)}
           <div className='flex justify-center gap-5'>
             <h1 className='text-3xl'>{index.name}</h1>
             <select 
