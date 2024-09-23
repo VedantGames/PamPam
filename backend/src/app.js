@@ -3,7 +3,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors({
-  origin: 'https://pampam.in',
+  origin: 'https://markethound.vercel.app',
   credentials: true
 }))
 
