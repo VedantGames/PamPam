@@ -8,8 +8,16 @@ const getAllExpiries = asyncHandeller( async (req, res) => {
   if (!expiriesData.ok) 
     throw new ApiError(404, 'Data can not be fetched');
 
-  const expiries = await expiriesData.json();
-
+  var expiries = await expiriesData.json();
+  expiries = {
+    ...expiries,
+    result: expiries.result.map(expiry => {
+      return {
+        ...expiry,
+        expiries: [expiry.expiries[0]]
+      }
+    })
+  };
     return res.status(200).json(
     new ApiResponse(200, expiries, 'Success')
   );
