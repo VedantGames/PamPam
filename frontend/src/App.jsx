@@ -2,55 +2,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Brush, CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-const data = [
-  {
-    name: 'Page A',
-    uv: 400.0,
-    pv: 240.0,
-    amt: 240.0,
-  },
-  {
-    name: 'Page B',
-    uv: 300.0,
-    pv: 139.8,
-    amt: 221.0,
-  },
-  {
-    name: 'Page C',
-    uv: 200.0,
-    pv: 980.0,
-    amt: 229.0,
-  },
-  {
-    name: 'Page D',
-    uv: 278.0,
-    pv: 390.8,
-    amt: 200.0,
-  },
-  {
-    name: 'Page E',
-    uv: 189.0,
-    pv: 480.0,
-    amt: 218.1,
-  },
-  {
-    name: 'Page F',
-    uv: 239.0,
-    pv: 380.0,
-    amt: 250.0,
-  },
-  {
-    name: 'Page G',
-    uv: 349.0,
-    pv: 430.0,
-    amt: 210.0,
-  },
-];
-
-
 const baseURLS = ['http://localhost:8000/api/v1', 'https://pampam-server.vercel.app/api/v1'];
 
-axios.defaults.baseURL = baseURLS[0];
+axios.defaults.baseURL = baseURLS[1];
 axios.defaults.withCredentials = true;
 
 const CustomTooltip = ({ active, payload }) => {
@@ -73,7 +27,6 @@ const CustomTooltip = ({ active, payload }) => {
 
   return null;
 };
-
 
 function App() {
   const [expiryData, setExpiryData] = useState([]);
