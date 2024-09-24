@@ -94,8 +94,10 @@ function App() {
 
         if ((hours > 9 || (hours === 9 && minutes >= 15)) && (hours < 15 || (hours === 15 && minutes <= 30)))
           setInterval(loadExpiriesData, 60000);
-        else 
+        else {
           setInterval(loadExpiriesData, new Date().setHours(9, 15, 0, 0) - new Date());
+          console.log(new Date().setHours(9, 15, 0, 0) - new Date());
+        }
       })
       .catch((error) => console.log(error));
   };
