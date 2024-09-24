@@ -50,7 +50,7 @@ const data = [
 
 const baseURLS = ['http://localhost:8000/api/v1', 'https://pampam-server.vercel.app/api/v1'];
 
-axios.defaults.baseURL = baseURLS[1];
+axios.defaults.baseURL = baseURLS[0];
 axios.defaults.withCredentials = true;
 
 const CustomTooltip = ({ active, payload }) => {
@@ -94,10 +94,6 @@ function App() {
 
         if ((hours > 9 || (hours === 9 && minutes >= 15)) && (hours < 15 || (hours === 15 && minutes <= 30)))
           setInterval(loadExpiriesData, 60000);
-        else {
-          setInterval(loadExpiriesData, new Date().setHours(9, 15, 0, 0) - new Date());
-          console.log(new Date().setHours(9, 15, 0, 0) - new Date());
-        }
       })
       .catch((error) => console.log(error));
   };
@@ -107,48 +103,30 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const mfunc = async () => {
-      var tempPrem = [];
-      var tempIndex = []; 
-
-      var tempLP = [];
-      var tempAllLP = [];
-  
+    const mfunc = async () => {  
       if (expiryData.length > 6) {  
-        for (var i = 0; i < expiryData.length; i++) {
-          const index = expiryData[i];
-          for (var j = 0; j < index.expiries.length; j++) {
-            const expiry = index.expiries[j];
-  
-            const data = await axios.get('premiums/'+index.name+'/'+expiry);
-            var d = data.data.data.result;
-
-            d = d.map(indD => {
-              var time = new Date(indD.time).toLocaleTimeString().replace(' PM', '').replace(' AM', '');
-              time = time.replace(time.slice(-3), '');
-              return {...indD, time, fulltime: indD.time, straddle_price: Math.round(indD.straddle_price*100)/100} 
-            });
-
-            tempLP.push(d[d.length-1]?.straddle_price);
-            tempIndex.push(d);
-          }
-          tempAllLP.push(tempLP);
-          tempPrem.push(tempIndex)
-          tempIndex = [];
-          tempLP = [];
-        }
-        setPremiumsData(tempPrem);
-        setLastPrices(tempAllLP);
+        const data = expiryData.map(index => axios.get('premiums/'+index.name+'/'+index.expiries[0]));
+        const results = await Promise.all(data);
+        console.log(results)
+        var d = results.map(result => result.data.data.result);
+        console.log(results, d)
+            
+        d = d.map(d => d.map(indD => {
+          var time = new Date(indD.time).toLocaleTimeString().replace(' PM', '').replace(' AM', '');
+          time = time.replace(time.slice(-3), '');
+          return {...indD, time, fulltime: indD.time, straddle_price: Math.round(indD.straddle_price*100)/100} 
+        }));
+        setPremiumsData(d.map(d => d));
+        setLastPrices(d.map(d => d[d.length-1]?.straddle_price || 0));
       }
     }
-    mfunc();
+    mfunc()
   }, [expiryData]);
 
   return (
     <div className='grid grid-cols-3 mt-10 font-sans'>
       {(expiryData.length > 0 && premiumsData.length > 0) ? expiryData.map((index, i) => (
         <div key={index} className='w-full mb-5'>
-          {console.log(expiryData)}
           <div className='flex justify-center gap-5'>
             <h1 className='text-3xl'>{index.name}</h1>
             <select 
@@ -163,10 +141,11 @@ function App() {
             </select>
           </div>
           <ResponsiveContainer width='100%' height={300}>
+            {console.log(premiumsData[i])}
               <LineChart
                 width={1000}
                 height={3}
-                data={premiumsData[i][selectedExpiries[i]]}
+                data={premiumsData[i]}
                 margin={{
                   top: 5,
                   right: 30,
@@ -179,8 +158,9 @@ function App() {
                 <YAxis orientation='right' domain={[]} dataKey="straddle_price"/>
                 <Tooltip content={<CustomTooltip />} labelStyle={{color: '#000000'}} />
                 <Line type="monotone" dataKey="straddle_price" stroke="#8884d8" activeDot={false} dot={false} />
+                {console.log(lastPrices[i])}
                 <ReferenceLine 
-                  y={lastPrices[i][selectedExpiries[i]]}
+                  y={lastPrices[i]}//[selectedExpiries[i]]}
                   label={({ viewBox }) => {
                     const { x, y, width } = viewBox;
                     return (
@@ -203,7 +183,7 @@ function App() {
                           textAnchor="middle" 
                           dominantBaseline="middle"
                         >
-                          {lastPrices[i][selectedExpiries[i]]}
+                          {lastPrices[i]}
                         </text>
                       </g>
                     );
